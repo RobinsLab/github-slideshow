@@ -2,3 +2,9 @@ _site/
 .sass-cache/
 .jekyll-metadata
 .bundle
+
+# News digest
+output/
+.env
+__pycache__/
+*.pyc

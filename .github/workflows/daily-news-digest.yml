@@ -1,0 +1,43 @@
+name: Daily News Digest
+
+on:
+  schedule:
+    # 毎朝6:30 JST (21:30 UTC前日) に実行
+    - cron: '30 21 * * *'
+  workflow_dispatch:
+    inputs:
+      top_n:
+        description: '記事数'
+        required: false
+        default: '5'
+
+jobs:
+  generate-digest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate news digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OUTPUT_DIR: ./output
+        run: |
+          python -m news_digest.main --auto --top ${{ github.event.inputs.top_n || '5' }}
+
+      - name: Upload audio artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-digest-${{ github.run_id }}
+          path: output/
+          retention-days: 7
