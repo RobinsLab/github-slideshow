@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1117">
+<title>News Digest</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <h1>📻 News Digest</h1>
+  <div class="date" id="dateLabel"></div>
+</header>
+
+<div class="container">
+  <div id="statusBar" class="status loading">
+    <span class="dot"></span>
+    <span id="statusText">記事を取得中...</span>
+  </div>
+
+  <div id="articleList"></div>
+
+  <div id="selectedCount" class="selected-count" style="display:none">
+    <span id="countText">0件選択中</span>
+  </div>
+
+  <!-- Script result -->
+  <div id="scriptSection" style="display:none">
+    <div class="section-title">生成された原稿</div>
+    <div id="scriptBox" class="script-box"></div>
+  </div>
+
+  <!-- Audio player -->
+  <div id="playerSection" style="display:none">
+    <div class="player">
+      <div class="title">🎧 ニュースダイジェスト</div>
+      <div class="info" id="playerInfo"></div>
+      <audio id="audioPlayer" controls preload="auto"></audio>
+      <a id="downloadLink" class="btn btn-secondary" style="display:inline-block;margin-top:8px;text-decoration:none;max-width:none">
+        ダウンロード
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Action bar -->
+<div class="action-bar">
+  <button id="btnGenerate" class="btn btn-primary" disabled onclick="generate()">
+    原稿を生成
+  </button>
+  <button id="btnAudio" class="btn btn-secondary" style="display:none" onclick="generateAudio()">
+    🎙️ 音声化
+  </button>
+</div>
+
+<!-- Loading overlay -->
+<div id="overlay" class="overlay hidden">
+  <div class="spinner"></div>
+  <p id="overlayText">処理中...</p>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+const selected = new Set();
+let articles = [];
+let currentScript = '';
+
+const $ = id => document.getElementById(id);
+
+// Date
+const now = new Date();
+$('dateLabel').textContent = now.toLocaleDateString('ja-JP', {
+  year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+});
+
+// Load articles
+async function loadArticles() {
+  try {
+    const res = await fetch('/api/articles');
+    const data = await res.json();
+    articles = data.articles;
+
+    if (articles.length === 0) {
+      setStatus('error', '記事が取得できませんでした');
+      return;
+    }
+
+    setStatus('ok', `${articles.length}件の記事を取得しました`);
+    renderArticles();
+  } catch (e) {
+    setStatus('error', `エラー: ${e.message}`);
+  }
+}
+
+function setStatus(type, text) {
+  const bar = $('statusBar');
+  bar.className = 'status' + (type === 'error' ? ' error' : type === 'loading' ? ' loading' : '');
+  $('statusText').textContent = text;
+}
+
+function renderArticles() {
+  const list = $('articleList');
+  list.innerHTML = '';
+
+  const groups = {};
+  articles.forEach(a => {
+    const key = a.source;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(a);
+  });
+
+  for (const [source, items] of Object.entries(groups)) {
+    const title = document.createElement('div');
+    title.className = 'section-title';
+    title.textContent = source;
+    list.appendChild(title);
+
+    items.forEach(a => {
+      const card = document.createElement('div');
+      card.className = 'article' + (selected.has(a.id) ? ' selected' : '');
+      card.onclick = () => toggleSelect(a.id, card);
+      card.innerHTML = `
+        <div class="check"></div>
+        <span class="source">${a.category}</span>
+        <div class="title">${a.title}</div>
+        <div class="summary">${a.summary ? a.summary.slice(0, 100) + '...' : ''}</div>
+        <div class="meta">${a.published || ''}</div>
+      `;
+      list.appendChild(card);
+    });
+  }
+}
+
+function toggleSelect(id, el) {
+  if (selected.has(id)) {
+    selected.delete(id);
+    el.classList.remove('selected');
+  } else {
+    selected.add(id);
+    el.classList.add('selected');
+  }
+  updateCount();
+}
+
+function updateCount() {
+  const n = selected.size;
+  const countEl = $('selectedCount');
+  countEl.style.display = n > 0 ? 'block' : 'none';
+  $('countText').textContent = `${n}件選択中`;
+  $('btnGenerate').disabled = n === 0;
+}
+
+// Generate script
+async function generate() {
+  if (selected.size === 0) return;
+
+  showOverlay('ニュース原稿を生成中...');
+  try {
+    const res = await fetch('/api/generate-script', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ article_ids: Array.from(selected) })
+    });
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    currentScript = data.script;
+    $('scriptBox').textContent = currentScript;
+    $('scriptSection').style.display = 'block';
+    $('btnAudio').style.display = 'block';
+    $('scriptSection').scrollIntoView({ behavior: 'smooth' });
+    showToast('原稿を生成しました');
+  } catch (e) {
+    showToast(`エラー: ${e.message}`);
+  }
+  hideOverlay();
+}
+
+// Generate audio
+async function generateAudio() {
+  if (!currentScript) return;
+
+  showOverlay('音声を生成中...\nしばらくお待ちください');
+  try {
+    const res = await fetch('/api/generate-audio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ script: currentScript })
+    });
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    const player = $('audioPlayer');
+    player.src = data.audio_url;
+    $('playerInfo').textContent = data.filename;
+    $('downloadLink').href = data.audio_url;
+    $('downloadLink').download = data.filename;
+    $('playerSection').style.display = 'block';
+    $('playerSection').scrollIntoView({ behavior: 'smooth' });
+    showToast('音声を生成しました');
+  } catch (e) {
+    showToast(`エラー: ${e.message}`);
+  }
+  hideOverlay();
+}
+
+function showOverlay(text) {
+  $('overlayText').textContent = text;
+  $('overlay').classList.remove('hidden');
+}
+function hideOverlay() {
+  $('overlay').classList.add('hidden');
+}
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+loadArticles();
+</script>
+</body>
+</html>
