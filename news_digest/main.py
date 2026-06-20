@@ -20,6 +20,7 @@
 """
 
 import argparse
+import json
 import sys
 from .fetcher import fetch_all_articles, Article
 from .recommender import recommend_articles
@@ -27,7 +28,27 @@ from .script_generator import generate_news_script
 from .audio_generator import generate_audio
 
 
-def _fetch_articles(source: str) -> list[Article]:
+def _load_from_file(path: str) -> list[Article]:
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    articles = []
+    for i, item in enumerate(data, 1):
+        articles.append(Article(
+            id=i,
+            title=item["title"],
+            summary=item.get("summary", ""),
+            link=item.get("link", ""),
+            source=item.get("source", "Unknown"),
+            category=item.get("category", ""),
+            published=item.get("published", ""),
+        ))
+    return articles
+
+
+def _fetch_articles(source: str, from_file: str | None = None) -> list[Article]:
+    if from_file:
+        print(f"📂 ファイルから記事を読み込み: {from_file}")
+        return _load_from_file(from_file)
     if source == "newsapi":
         from .web_fetcher import fetch_all_from_newsapi
         return fetch_all_from_newsapi()
@@ -55,13 +76,13 @@ def parse_selection(input_str: str, max_id: int) -> list[int]:
     return [s for s in selected if 1 <= s <= max_id]
 
 
-def interactive_mode(source: str, script_only: bool = False):
+def interactive_mode(source: str, script_only: bool = False, from_file: str | None = None):
     print("=" * 60)
     print("📻 ニュースダイジェスト音声生成ツール")
     print("=" * 60)
     print()
 
-    articles = _fetch_articles(source)
+    articles = _fetch_articles(source, from_file)
     if not articles:
         print("❌ 記事が取得できませんでした")
         sys.exit(1)
@@ -144,13 +165,13 @@ def interactive_mode(source: str, script_only: bool = False):
         print("\n続けて別の記事を選択できます。終了するには q を入力してください。")
 
 
-def auto_mode(top_n: int = 5, source: str = "rss", script_only: bool = False):
+def auto_mode(top_n: int = 5, source: str = "rss", script_only: bool = False, from_file: str | None = None):
     print("=" * 60)
     print("📻 ニュースダイジェスト（自動モード）")
     print("=" * 60)
     print()
 
-    articles = _fetch_articles(source)
+    articles = _fetch_articles(source, from_file)
     if not articles:
         print("❌ 記事が取得できませんでした")
         sys.exit(1)
@@ -187,8 +208,8 @@ def auto_mode(top_n: int = 5, source: str = "rss", script_only: bool = False):
         return audio_path
 
 
-def list_only(source: str = "rss"):
-    articles = _fetch_articles(source)
+def list_only(source: str = "rss", from_file: str | None = None):
+    articles = _fetch_articles(source, from_file)
     if not articles:
         print("❌ 記事が取得できませんでした")
         sys.exit(1)
@@ -209,14 +230,16 @@ def main():
                         help="ニュースソース (default: rss)")
     parser.add_argument("--script-only", action="store_true",
                         help="原稿のみ生成（音声生成をスキップ）")
+    parser.add_argument("--from-file", type=str, default=None,
+                        help="JSONファイルから記事を読み込み")
     args = parser.parse_args()
 
     if args.list_only:
-        list_only(args.source)
+        list_only(args.source, args.from_file)
     elif args.auto:
-        auto_mode(args.top, args.source, args.script_only)
+        auto_mode(args.top, args.source, args.script_only, args.from_file)
     else:
-        interactive_mode(args.source, args.script_only)
+        interactive_mode(args.source, args.script_only, args.from_file)
 
 
 if __name__ == "__main__":
