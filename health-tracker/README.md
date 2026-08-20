@@ -27,6 +27,32 @@ bundle exec rackup -p 4567
 モデルは既定で `claude-opus-5` を使用します。変更したい場合は `ANTHROPIC_MODEL`
 環境変数を設定してください。
 
+## Android (Termux) で動かす
+
+Puma (`nio4r`) はネイティブ拡張のビルドが必要で、Termux では失敗することが
+あります。その場合は Puma を外して WEBrick(純Ruby実装)で起動してください。
+
+```bash
+pkg update && pkg upgrade
+pkg install ruby git clang make
+
+git clone https://github.com/RobinsLab/github-slideshow.git
+cd github-slideshow/health-tracker
+
+# まずは普通にインストールを試す
+bundle install
+
+# もし puma/nio4r のビルドで失敗したら、puma を外して入れ直す
+bundle config set --local without puma_server
+bundle install
+
+export ANTHROPIC_API_KEY=sk-ant-...
+bundle exec rackup -s webrick -p 4567 -o 127.0.0.1
+```
+
+同じ端末のブラウザで http://localhost:4567 を開けば操作できます。写真での
+食事記録は、フォームのファイル選択でカメラを直接起動して撮影できます。
+
 ## 1日の終わりのレポート自動生成
 
 ```bash

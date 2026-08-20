@@ -33,6 +33,7 @@ GEM
       tilt (~> 2.0)
     standardwebhooks (1.1.0)
     tilt (2.9.0)
+    webrick (1.9.2)
 
 PLATFORMS
   ruby
@@ -43,6 +44,7 @@ DEPENDENCIES
   puma (~> 6.4)
   rackup (~> 2.1)
   sinatra (~> 4.2)
+  webrick (~> 1.9)
 
 CHECKSUMS
   anthropic (1.65.0) sha256=e278d7d436d52c424dfba28e1ce915b77098e9a9c5c1b42381b1515792d96382
@@ -60,6 +62,7 @@ CHECKSUMS
   sinatra (4.2.1) sha256=b7aeb9b11d046b552972ade834f1f9be98b185fa8444480688e3627625377080
   standardwebhooks (1.1.0) sha256=356ba711c14def4fb27310e4163b26bd5cccf325212c3440cabadd825e4be11f
   tilt (2.9.0) sha256=da5735d0280bba96e9a91041bb14aee435ccad5c17b0fa519249ae543d9aa3a5
+  webrick (1.9.2) sha256=beb4a15fc474defed24a3bda4ffd88a490d517c9e4e6118c3edce59e45864131
 
 RUBY VERSION
   ruby 3.3.6

@@ -3,6 +3,15 @@ source "https://rubygems.org"
 ruby ">= 3.1"
 
 gem "sinatra", "~> 4.2"
-gem "puma", "~> 6.4"
 gem "anthropic", "~> 1.65"
 gem "rackup", "~> 2.1"
+gem "webrick", "~> 1.9"
+
+# Puma needs a native extension (nio4r) to build, which is a common source
+# of pain on constrained/non-glibc environments like Termux on Android.
+# It's optional: on platforms where it won't build, skip it
+# (`bundle install --without puma_server`) and run with webrick instead
+# (`bundle exec rackup -s webrick`).
+group :puma_server do
+  gem "puma", "~> 6.4"
+end
