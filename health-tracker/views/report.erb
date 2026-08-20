@@ -1,0 +1,54 @@
+<h2><%= @date %> サマリレポート</h2>
+
+<% if @error %>
+  <p class="error"><%= @error %></p>
+<% else %>
+  <% review = @result[:review] %>
+
+  <section class="card">
+    <h3>食事サマリ</h3>
+    <p><%= review["daily_meal_summary"] %></p>
+  </section>
+
+  <section class="card">
+    <h3>体重サマリ</h3>
+    <p><%= review["daily_weight_summary"] %></p>
+  </section>
+
+  <section class="card harsh">
+    <h3>本日の辛口総合評価</h3>
+    <p><%= review["daily_harsh_review"] %></p>
+  </section>
+
+  <section class="card">
+    <h3>過去1週間の推移</h3>
+    <p><%= review["weekly_trend"] %></p>
+    <table>
+      <tr><th>日付</th><th>カロリー</th><th>朝体重</th><th>夜体重</th></tr>
+      <% @result[:week].each do |day| %>
+        <% morning = day[:weights].find { |w| w[:time_of_day] == "morning" } %>
+        <% night = day[:weights].find { |w| w[:time_of_day] == "night" } %>
+        <tr>
+          <td><%= day[:date] %></td>
+          <td><%= format_num(day[:totals][:calories]) %> kcal</td>
+          <td><%= morning ? "#{format_num(morning[:weight_kg])} kg" : "-" %></td>
+          <td><%= night ? "#{format_num(night[:weight_kg])} kg" : "-" %></td>
+        </tr>
+      <% end %>
+    </table>
+  </section>
+
+  <section class="card harsh">
+    <h3>過去1週間の辛口総合評価</h3>
+    <p><%= review["weekly_harsh_review"] %></p>
+  </section>
+
+  <section class="card">
+    <h3>改善提案</h3>
+    <ul>
+      <% (review["improvement_suggestions"] || []).each do |s| %>
+        <li><%= s %></li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

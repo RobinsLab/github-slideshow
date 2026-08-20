@@ -1,0 +1,3 @@
+data/meals/*.json
+data/weights/*.json
+data/reports/*.md

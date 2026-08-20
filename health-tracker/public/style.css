@@ -1,0 +1,109 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f7f5;
+  --card-bg: #ffffff;
+  --text: #222;
+  --muted: #777;
+  --accent: #2f7a4f;
+  --accent-dark: #1d5a37;
+  --harsh-bg: #fff3e6;
+  --harsh-border: #e08a3c;
+  --border: #e2e2e2;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Hiragino Sans", "Yu Gothic", -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+header {
+  background: var(--accent);
+  color: #fff;
+  padding: 1rem 1.5rem;
+}
+
+header h1 { margin: 0 0 .5rem; font-size: 1.2rem; }
+header h1 a { color: #fff; text-decoration: none; }
+
+nav a {
+  color: #eaf5ee;
+  margin-right: 1rem;
+  text-decoration: none;
+  font-size: .9rem;
+}
+nav a:hover { text-decoration: underline; }
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.card.harsh {
+  background: var(--harsh-bg);
+  border-color: var(--harsh-border);
+}
+
+.meal {
+  border-top: 1px solid var(--border);
+  padding: .75rem 0;
+}
+.meal:first-of-type { border-top: none; }
+
+.muted { color: var(--muted); font-size: .9rem; }
+.suggestion { color: var(--accent-dark); font-weight: 600; }
+.error { color: #b3261e; }
+
+.button {
+  display: inline-block;
+  background: #eee;
+  color: var(--text);
+  padding: .5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-top: .5rem;
+}
+.button.primary { background: var(--accent); color: #fff; }
+.button-row .button { margin-right: .5rem; }
+
+form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+form input, form select, form textarea {
+  display: block;
+  width: 100%;
+  margin-top: .3rem;
+  padding: .5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+button.button { border: none; cursor: pointer; font-size: 1rem; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: .5rem;
+}
+th, td {
+  text-align: left;
+  padding: .4rem .5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: .9rem;
+}

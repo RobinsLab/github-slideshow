@@ -1,0 +1,29 @@
+<h2>食事を記録</h2>
+
+<% if @error %>
+  <p class="error"><%= @error %></p>
+<% end %>
+
+<form action="/meals" method="post" enctype="multipart/form-data">
+  <label>
+    食事区分
+    <select name="meal_type">
+      <option value="breakfast" <%= "selected" if @meal_type == "breakfast" %>>朝食</option>
+      <option value="lunch" <%= "selected" if @meal_type == "lunch" %>>昼食</option>
+      <option value="dinner" <%= "selected" if @meal_type == "dinner" %>>夕食</option>
+    </select>
+  </label>
+
+  <label>
+    写真
+    <input type="file" name="photo" accept="image/*">
+  </label>
+
+  <label>
+    または、テキストで説明
+    <textarea name="text" rows="3" placeholder="例: 白米、鮭の塩焼き、味噌汁、ほうれん草のおひたし"></textarea>
+  </label>
+
+  <button type="submit" class="button primary">分析して記録する</button>
+</form>
+<p class="muted">写真かテキストのどちらか一方を入力してください。分析にはしばらく時間がかかることがあります。</p>

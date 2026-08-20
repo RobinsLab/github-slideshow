@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>食事・体重トラッカー</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="/">食事・体重トラッカー</a></h1>
+    <nav>
+      <a href="/">今日</a>
+      <a href="/meals/new">食事を記録</a>
+      <a href="/weights/new">体重を記録</a>
+      <a href="/report">サマリレポート</a>
+      <a href="/history">履歴</a>
+    </nav>
+  </header>
+  <main>
+    <%= yield %>
+  </main>
+</body>
+</html>

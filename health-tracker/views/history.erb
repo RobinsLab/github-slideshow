@@ -1,0 +1,18 @@
+<h2>過去1週間の履歴 (<%= @start_date %> 〜 <%= @end_date %>)</h2>
+
+<table>
+  <tr><th>日付</th><th>食事回数</th><th>合計カロリー</th><th>朝体重</th><th>夜体重</th></tr>
+  <% (@start_date..@end_date).each do |date| %>
+    <% meals = @meal_history[date.to_s] || [] %>
+    <% weights = @weight_history[date.to_s] || [] %>
+    <% morning = weights.find { |w| w[:time_of_day] == "morning" } %>
+    <% night = weights.find { |w| w[:time_of_day] == "night" } %>
+    <tr>
+      <td><%= date %></td>
+      <td><%= meals.length %></td>
+      <td><%= format_num(meals.sum { |m| m[:calories].to_f }) %> kcal</td>
+      <td><%= morning ? "#{format_num(morning[:weight_kg])} kg" : "-" %></td>
+      <td><%= night ? "#{format_num(night[:weight_kg])} kg" : "-" %></td>
+    </tr>
+  <% end %>
+</table>

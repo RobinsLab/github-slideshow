@@ -1,0 +1,51 @@
+<h2><%= @date %> の記録</h2>
+
+<section class="card">
+  <h3>体重</h3>
+  <% if @weights.empty? %>
+    <p class="muted">まだ記録がありません。</p>
+  <% else %>
+    <ul>
+      <% @weights.each do |w| %>
+        <li><%= w[:time_of_day] == "morning" ? "朝" : "夜" %>: <%= format_num(w[:weight_kg]) %> kg</li>
+      <% end %>
+    </ul>
+  <% end %>
+  <a class="button" href="/weights/new">体重を記録する</a>
+</section>
+
+<section class="card">
+  <h3>食事</h3>
+  <p>本日の合計カロリー: <strong><%= format_num(@totals[:calories]) %> kcal</strong>
+    (P: <%= format_num(@totals[:nutrition][:protein_g]) %>g /
+     F: <%= format_num(@totals[:nutrition][:fat_g]) %>g /
+     C: <%= format_num(@totals[:nutrition][:carbs_g]) %>g)</p>
+
+  <% if @meals.empty? %>
+    <p class="muted">まだ記録がありません。</p>
+  <% else %>
+    <% @meals.each do |m| %>
+      <article class="meal">
+        <h4><%= { "breakfast" => "朝食", "lunch" => "昼食", "dinner" => "夕食" }[m[:meal_type]] %>
+          <span class="muted"><%= m[:recorded_at] %></span></h4>
+        <p><%= (m[:items] || []).map { |i| "#{i["name"]}(#{i["calories"]}kcal)" }.join(" / ") %></p>
+        <p>カロリー: <%= format_num(m[:calories]) %> kcal /
+           P<%= format_num(m.dig(:nutrition, :protein_g)) %>g
+           F<%= format_num(m.dig(:nutrition, :fat_g)) %>g
+           C<%= format_num(m.dig(:nutrition, :carbs_g)) %>g</p>
+        <p class="muted"><%= m.dig(:nutrition, :balance_comment) %></p>
+        <p class="suggestion">改善提案: <%= m[:suggestion] %></p>
+      </article>
+    <% end %>
+  <% end %>
+
+  <div class="button-row">
+    <a class="button" href="/meals/new?meal_type=breakfast">朝食を記録</a>
+    <a class="button" href="/meals/new?meal_type=lunch">昼食を記録</a>
+    <a class="button" href="/meals/new?meal_type=dinner">夕食を記録</a>
+  </div>
+</section>
+
+<section class="card">
+  <a class="button primary" href="/report">今日のサマリレポートを見る</a>
+</section>

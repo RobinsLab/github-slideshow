@@ -1,0 +1,20 @@
+<h2>記録しました</h2>
+
+<article class="meal">
+  <h3><%= { "breakfast" => "朝食", "lunch" => "昼食", "dinner" => "夕食" }[@record[:meal_type]] %></h3>
+  <p><%= (@record[:items] || []).map { |i| "#{i["name"]}(#{i["calories"]}kcal)" }.join(" / ") %></p>
+  <p>このメニューのカロリー: <strong><%= format_num(@record[:calories]) %> kcal</strong></p>
+  <p>栄養バランス: P<%= format_num(@record.dig(:nutrition, :protein_g)) %>g /
+     F<%= format_num(@record.dig(:nutrition, :fat_g)) %>g /
+     C<%= format_num(@record.dig(:nutrition, :carbs_g)) %>g</p>
+  <p class="muted"><%= @record.dig(:nutrition, :balance_comment) %></p>
+  <p class="suggestion">改善提案: <%= @record[:suggestion] %></p>
+
+  <hr>
+  <p>本日ここまでの合計カロリー: <strong><%= format_num(@record.dig(:day_totals_at_record, :calories)) %> kcal</strong></p>
+  <p>本日ここまでの栄養バランス: P<%= format_num(@record.dig(:day_totals_at_record, :protein_g)) %>g /
+     F<%= format_num(@record.dig(:day_totals_at_record, :fat_g)) %>g /
+     C<%= format_num(@record.dig(:day_totals_at_record, :carbs_g)) %>g</p>
+</article>
+
+<a class="button" href="/">今日の記録に戻る</a>
